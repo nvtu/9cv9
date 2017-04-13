@@ -1,0 +1,39 @@
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/tools">
+
+    <infection.application9cv9.Modules.MapWrapperLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/map_wrapper">
+        <fragment
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.MapFragment"/>
+    </infection.application9cv9.Modules.MapWrapperLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_chooseDest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        app:backgroundTint="@android:color/white"
+        android:src="@mipmap/ic_raise_alert" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_raise_alert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="@dimen/fab_margin"
+        android:layout_marginBottom="@dimen/fab_raise_alert_margin"
+        android:src="@mipmap/ic_navigation"
+        app:backgroundTint="@android:color/white"
+        app:layout_anchor="@id/fab_chooseDest"
+        app:layout_anchorGravity="top" />
+
+</android.support.design.widget.CoordinatorLayout>
