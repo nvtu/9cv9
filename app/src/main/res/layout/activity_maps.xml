@@ -21,8 +21,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:backgroundTint="@android:color/white"
-        android:src="@mipmap/ic_raise_alert" />
+        android:src="@mipmap/ic_navigation"
+        />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_raise_alert"
@@ -31,8 +31,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginRight="@dimen/fab_margin"
         android:layout_marginBottom="@dimen/fab_raise_alert_margin"
-        android:src="@mipmap/ic_navigation"
-        app:backgroundTint="@android:color/white"
+        android:src="@mipmap/ic_raise_alert"
         app:layout_anchor="@id/fab_chooseDest"
         app:layout_anchorGravity="top" />
 

@@ -3,16 +3,17 @@ package infection.application9cv9;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.util.Property;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +36,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import infection.application9cv9.Fragment.DialogNotificationFragment;
+import cn.pedant.SweetAlert.SweetAlertDialog;
+import infection.application9cv9.Fragment.DialogPopUpFragment;
 import infection.application9cv9.Modules.DirectionFinder;
 import infection.application9cv9.Modules.DirectionFinderListener;
 import infection.application9cv9.Modules.GPSTracker;
@@ -43,7 +45,7 @@ import infection.application9cv9.Modules.MapWrapperLayout;
 import infection.application9cv9.Modules.OnInterInfoWindowTouchListener;
 import infection.application9cv9.Modules.Route;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, DirectionFinderListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, DirectionFinderListener{
 
     private GoogleMap mMap;
     private float PlaceLat;
@@ -73,6 +75,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FloatingActionButton raiseAlert;
     private FloatingActionButton chooseDestination;
 
+    DialogPopUpFragment dialogPopUpFragment;
+
+    public static String destination;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,19 +93,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         initListeners();
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void initComponents() {
         contentView = LayoutInflater.from(this).inflate(R.layout.layout_maker_content, null);
         raiseAlert = (FloatingActionButton) findViewById(R.id.fab_raise_alert);
         chooseDestination = (FloatingActionButton) findViewById(R.id.fab_chooseDest);
         raiseAlert.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
         chooseDestination.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+
+        raiseAlert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new SweetAlertDialog(MapsActivity.this, SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText("Are you sure?")
+                        .setContentText("You won't be able to recover this file!")
+                        .setCancelText("NO")
+                        .setConfirmText("YES")
+                        .showCancelButton(true)
+                        .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                sDialog.cancel();
+                            }
+                        })
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                sweetAlertDialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
+        });
         chooseDestination.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                DialogNotificationFragment chooseDestDialog = new DialogNotificationFragment();
-                chooseDestDialog.show(transaction, "Choose Destination");
-                Log.d("abcd", chooseDestDialog.getDest());
+                dialogPopUpFragment = new DialogPopUpFragment();
+                dialogPopUpFragment.show(transaction, "Choose Dest");
             }
         });
     }

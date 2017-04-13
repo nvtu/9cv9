@@ -15,10 +15,10 @@ import infection.application9cv9.R;
 /**
  * Created by Tu Van Ninh on 4/13/2017.
  */
-public class DialogNotificationFragment extends DialogFragment {
+public class DialogPopUpFragment extends DialogFragment {
 
-    private Button buttonFindPath;
-    EditText destination;
+    Button buttonFindPath;
+    EditText destinationText;
 
     @Nullable
     @Override
@@ -26,11 +26,10 @@ public class DialogNotificationFragment extends DialogFragment {
         super.onCreateView(inflater, container, savedInstanceState);
         final View rootView = inflater.inflate(R.layout.dialog_choose_dest, container, false);
         buttonFindPath = (Button) rootView.findViewById(R.id.findPath);
-        destination = (EditText) rootView.findViewById(R.id.destination);
+        destinationText = (EditText) rootView.findViewById(R.id.destination);
         buttonFindPath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 getDialog().dismiss();
             }
         });
@@ -42,9 +41,8 @@ public class DialogNotificationFragment extends DialogFragment {
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         super.onActivityCreated(savedInstanceState);
         getDialog().getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+
     }
 
-    public String getDest() {
-        return destination.getText().toString();
-    }
+
 }
