@@ -1,7 +1,6 @@
 package infection.application9cv9.ServerWidget;
 
 import android.content.Context;
-import android.util.Pair;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -32,11 +31,9 @@ public class LoadRoadInfo extends LoadDataTask {
             JSONArray array = new JSONArray(s);
             for (int i=0; i<array.length(); i++){
                 JSONArray road = array.getJSONObject(i).getJSONArray("road");
-
                 JSONObject object = road.getJSONObject(0);
                 Double slat = object.getDouble("lat");
                 Double slng = object.getDouble("long");
-
                 object = road.getJSONObject(1);
                 Double elat = object.getDouble("lat");
                 Double elng = object.getDouble("long");

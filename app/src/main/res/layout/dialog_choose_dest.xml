@@ -3,13 +3,13 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:minHeight="180dp"
+    android:minHeight="160dp"
     android:minWidth="250dp"
     android:padding="20dp">
     <EditText
         android:layout_width="match_parent"
-        android:layout_height="15dp"
-        android:layout_weight="0.5"
+        android:layout_height="10dp"
+        android:layout_weight="0.3"
         android:layout_marginBottom="20dp"
         android:id="@+id/destination"
         android:hint="Choose Destination"
@@ -18,8 +18,8 @@
         android:textSize="14sp" />
     <Button
         android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:layout_weight="0.5"
+        android:layout_height="10dp"
+        android:layout_weight="0.3"
         android:id="@+id/findPath"
         android:background="#00aaf7"
         android:text="FIND PATH"

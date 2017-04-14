@@ -38,6 +38,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.vision.face.Landmark;
 
+
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
@@ -59,7 +60,8 @@ import infection.application9cv9.ServerWidget.RequestToServer;
 
 import static com.google.maps.android.SphericalUtil.computeDistanceBetween;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, DirectionFinderListener, RequestToServer.RequestResult,  LoadRoadInfo.OnFinishLoadRoadInfo, DialogPopUpFragment.OnCompleteDialog{
+
+public class MapsActivity extends FragmentActivity implements RequestToServer.RequestResult, OnMapReadyCallback, DirectionFinderListener, LoadRoadInfo.OnFinishLoadRoadInfo, DialogPopUpFragment.OnCompleteDialog{
 
     private GoogleMap mMap;
     private float PlaceLat;
@@ -100,8 +102,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static String destination;
     private PolylineOptions mPolylineOps;
     private Polyline mPolyline;
-    LoadRoadInfo loadRoadInfo;
 
+    LoadRoadInfo loadRoadInfo;
+    RequestToServer requestToServer;
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,7 +119,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         initComponents();
         initListeners();
+//        loadRoadInfo = new LoadRoadInfo(this);
+//        loadRoadInfo.delegate = this;
+//        loadRoadInfo.execute("http://192.168.1.60:5000/xvideos");
+//        startService(new Intent(this, NotificationService.class));
+//        JsonHelper helper = new JsonHelper();
+//        try {
+//            Log.d("TuTuTu", helper.writeQuery("111.111", "112.222", "0.0", "5.0"));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        requestToServer = new RequestToServer();
+        requestToServer.delegate = this;
+        try {
+            requestToServer.execute(new JsonHelper().writeQuery("10.75201684447029", "106.65901912611416", "10.756377781053402", "106.68518281777517"), "http://192.168.1.60:5000/xhamster");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
+
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void initComponents() {
@@ -128,8 +152,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 new SweetAlertDialog(MapsActivity.this, SweetAlertDialog.WARNING_TYPE)
-                        .setTitleText("Are you sure?")
-                        .setContentText("You won't be able to recover this file!")
+                        .setTitleText("Are you stuck?")
+                        .setContentText("Are you in a traffic jam and wanna find another way?")
                         .setCancelText("NO")
                         .setConfirmText("YES")
                         .showCancelButton(true)
@@ -389,6 +413,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void processFinish(String result) {
 
     }
+
+//    @Override
+//    public void processFinish(String result) {
+//
+//    }
+
 
     public class MarkerAnimation {
         ArrayList<LatLng> _trips = new ArrayList<>();

@@ -1,5 +1,7 @@
 package infection.application9cv9.Fragment;
 
+import android.view.Window;
+
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -58,7 +60,6 @@ public class DialogPopUpFragment extends DialogFragment {
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         super.onActivityCreated(savedInstanceState);
         getDialog().getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-
     }
 
     public interface OnCompleteDialog{
