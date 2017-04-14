@@ -33,6 +33,7 @@ public class RequestToServer extends AsyncTask<String, Void, String> {
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
         Log.d("Abcd", s);
+
         delegate.processFinish(s);
     }
 

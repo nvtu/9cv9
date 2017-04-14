@@ -1,13 +1,22 @@
 package infection.application9cv9.BroadcastService;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.Timer;
 import java.util.TimerTask;
+
+import infection.application9cv9.R;
 
 /**
  * Created by Tu Van Ninh on 4/12/2017.
@@ -61,25 +70,26 @@ public class NotificationService extends Service{
 
     public void notifiy(){
         Log.d("TuVanNinh", "hahahaa");
-//        IntentFilter intentFilter = new IntentFilter();
-//        intentFilter.addAction("RSSPullService");
-//        Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(""));
-//        PendingIntent pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, myIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
-//        Context context = getApplicationContext();
-//
-//        Notification.Builder builder;
-//        builder = new Notification.Builder(context)
-//                    .setContentTitle("T")
-//                    .setContentText("M")
-//                    .setContentIntent(pendingIntent)
-//                    .setDefaults(Notification.DEFAULT_SOUND)
-//                    .setAutoCancel(true)
-//                    .setSmallIcon(R.drawable.lock);
-//
-//        Notification notification = builder.build();
-//
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//        notificationManager.notify(1, notification);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("RSSPullService");
+        Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(""));
+        PendingIntent pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, myIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
+        Context context = getApplicationContext();
+
+        Notification.Builder builder;
+        builder = new Notification.Builder(context)
+                    .setContentTitle("T")
+                    .setContentText("M")
+                    .setContentIntent(pendingIntent)
+                    .setDefaults(Notification.DEFAULT_SOUND)
+                    .setAutoCancel(true)
+                    .setSmallIcon(R.drawable.icon)
+                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.icon));
+
+        Notification notification = builder.build();
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1, notification);
     }
 
 

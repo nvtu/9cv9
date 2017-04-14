@@ -1,5 +1,6 @@
 package infection.application9cv9.Fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -19,6 +20,7 @@ public class DialogPopUpFragment extends DialogFragment {
 
     Button buttonFindPath;
     EditText destinationText;
+    private EditNameDialogListener listener;
 
     @Nullable
     @Override
@@ -30,6 +32,7 @@ public class DialogPopUpFragment extends DialogFragment {
         buttonFindPath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                listener.onFinishEditDialog(destinationText.getText().toString());
                 getDialog().dismiss();
             }
         });
@@ -37,12 +40,28 @@ public class DialogPopUpFragment extends DialogFragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        // Verify that the host activity implements the callback interface
+        try {
+            // Instantiate the EditNameDialogListener so we can send events to the host
+            listener = (EditNameDialogListener) context;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(context.toString()
+                    + " must implement EditNameDialogListener");
+        }
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         super.onActivityCreated(savedInstanceState);
         getDialog().getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-
     }
 
+    public interface EditNameDialogListener {
+        void onFinishEditDialog(String inputText);
+    }
 
 }

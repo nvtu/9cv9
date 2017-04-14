@@ -17,7 +17,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
@@ -35,9 +35,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <!--<service-->
-            <!--android:name=".BroadcastService.NotificationService"-->
-            <!--android:exported="false" />-->
+        <service
+            android:name=".BroadcastService.NotificationService"
+            android:exported="false" />
 
         <activity
             android:name=".MapsActivity"
