@@ -9,14 +9,20 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+import android.util.Pair;
 import android.util.Property;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -32,6 +38,9 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.vision.face.Landmark;
 
+import org.jsoup.Jsoup;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +53,13 @@ import infection.application9cv9.Modules.GPSTracker;
 import infection.application9cv9.Modules.MapWrapperLayout;
 import infection.application9cv9.Modules.OnInterInfoWindowTouchListener;
 import infection.application9cv9.Modules.Route;
+import infection.application9cv9.ServerWidget.JsonHelper;
+import infection.application9cv9.ServerWidget.LoadRoadInfo;
+import infection.application9cv9.ServerWidget.RequestToServer;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, DirectionFinderListener{
+import static com.google.maps.android.SphericalUtil.computeDistanceBetween;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, DirectionFinderListener, RequestToServer.RequestResult,  LoadRoadInfo.OnFinishLoadRoadInfo, DialogPopUpFragment.OnCompleteDialog{
 
     private GoogleMap mMap;
     private float PlaceLat;
@@ -54,6 +68,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private View contentView;
     private MapWrapperLayout mapWrapperLayout;
     private OnInterInfoWindowTouchListener lsClick;
+
+    private ImageView ivInstruction, ivPrevInstruction, ivNextInstruction;
+    private TextView tvInstruction;
+    private LinearLayout llInstruction;
 
     private List<Marker> StartPosMarkers = new ArrayList<>();
     private List<Marker> DestinationMarkers = new ArrayList<>();
@@ -76,8 +94,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FloatingActionButton chooseDestination;
 
     DialogPopUpFragment dialogPopUpFragment;
+    int posInstruction;
+    private Route mRoute;
 
     public static String destination;
+    private PolylineOptions mPolylineOps;
+    private Polyline mPolyline;
+    LoadRoadInfo loadRoadInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,39 +156,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 dialogPopUpFragment.show(transaction, "Choose Dest");
             }
         });
+        ivInstruction = (ImageView) findViewById(R.id.iv_ins_direction);
+        tvInstruction  = (TextView) findViewById(R.id.tv_ins_text);
+        llInstruction = (LinearLayout) findViewById(R.id.ll_instruction);
+        ivPrevInstruction = (ImageView) findViewById(R.id.iv_ins_prev);
+        ivNextInstruction = (ImageView) findViewById(R.id.iv_ins_next);
     }
 
     private void initListeners() {
-//        btnFindPath.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                sendFindPathRequest();
-//            }
-//        });
-//
-//        // Start of click button Invite
-//        lsClick = new OnInterInfoWindowTouchListener(btnInvite) {
-//            @Override
-//            protected void onClickConfirmed(View v, Marker marker) {
-//                int pos = Integer.parseInt(marker.getTitle());
-//            }
-//        };
-//        btnInvite.setOnTouchListener(lsClick);
-        // End of click button Invite
 
-//        //Start of click button GetHere
-//        ghClick = new OnInterInfoWindowTouchListener(btnGetHere) {
-//            @Override
-//            protected void onClickConfirmed(View v, Marker marker) {
-//                if (mMap.getMyLocation() != null)
-//                    MyLoc = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
-//                etStartPos.setText(MyLoc.latitude + " " + MyLoc.longitude);
-//                etDestination.setText(marker.getPosition().latitude + " " + marker.getPosition().longitude);
-//                sendFindPathRequest();
-//            }
-//        };
-//        btnGetHere.setOnTouchListener(ghClick);
-        //End of click button GetHere
 
     }
 
@@ -174,16 +173,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         strStartPos = gps.getLatitude() + ", " + gps.getLongitude();
         strDestination = etDestination;
 
-
-        if (strStartPos.isEmpty()) {
-            Toast.makeText(this, "Please enter the starting point", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (strDestination.isEmpty()) {
-            Toast.makeText(this, "Please enter the destination", Toast.LENGTH_SHORT).show();
-            return;
-        }
         try {
             new DirectionFinder(this, strStartPos, strDestination).execute();
         } catch (UnsupportedEncodingException e) {
@@ -199,6 +188,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         mMap.setMyLocationEnabled(true);
+
+        if (mMap!=null) {
+            RequestToServer rts = new RequestToServer();
+            rts.delegate = this;
+            try {
+                Log.d("Request", "sent");
+                rts.execute(new JsonHelper().writeQuery("10.766017", "106.67499", "10.763360", "106.687014"), "http://192.168.1.107:5000/xhamster");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            Log.d("loading", "loaded");
+//            loadRoadInfo = new LoadRoadInfo(this);
+//            loadRoadInfo.delegate = this;
+//            loadRoadInfo.execute("http://192.168.1.60:5000/xvideos");
+        }
 
         //Handle Popup Info window
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
@@ -279,7 +283,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         PolylinePaths = new ArrayList<>();
         ArrayList<LatLng> listTrip = new ArrayList<>();
 
-        for (final Route route : routes) {
+        for (Route route : routes) {
+            mRoute = route;
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.startLocation, 16));
 
             StartPosMarker = mMap.addMarker(new MarkerOptions()
@@ -294,7 +299,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             PolylineOptions polylineOptions = new PolylineOptions()
                     .geodesic(true)
-                    .color(Color.RED)
+                    .color(Color.BLUE)
                     .width(15);
 
             for (int i = 0; i < route.points.size(); i++) {
@@ -306,6 +311,83 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         MarkerAnimation markerAnimation = new MarkerAnimation();
         markerAnimation.animateLine(listTrip, mMap, StartPosMarker, this);
+
+        posInstruction = 0;
+        llInstruction.setVisibility(View.VISIBLE);
+        showInstruction();
+
+        ivNextInstruction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (posInstruction < mRoute.steps.size() - 1)
+                    posInstruction += 1;
+                showInstruction();
+            }
+        });
+
+        ivPrevInstruction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (posInstruction > 0)
+                    posInstruction-=1;
+                showInstruction();
+            }
+        });
+    }
+
+    public void showInstruction(){
+        String strInstruction = html2text(mRoute.steps.get(posInstruction).htmlInstructions);
+        tvInstruction.setText(strInstruction);
+
+        if (mRoute.steps.get(posInstruction).maneuver!=null) {
+            if (mRoute.steps.get(posInstruction).maneuver.equals("turn-left"))
+                ivInstruction.setImageResource(R.drawable.go_ahead);
+            else if (mRoute.steps.get(posInstruction).maneuver.equals("turn-right"))
+                ivInstruction.setImageResource(R.drawable.turn_right);
+            else ivInstruction.setImageResource(R.drawable.go_ahead);
+        } else ivInstruction.setImageResource(R.drawable.go_ahead);
+
+        if (mPolyline != null)
+            mPolyline.remove();
+        mPolylineOps = new PolylineOptions()
+                .geodesic(true)
+                .color(Color.MAGENTA)
+                .width(15);
+        for (int i=0; i<mRoute.steps.get(posInstruction).points.size()-1; i++)
+            mPolylineOps.add(mRoute.steps.get(posInstruction).points.get(i));
+        mPolyline = mMap.addPolyline(mPolylineOps);
+    }
+
+    public String html2text(String html) {
+        return Jsoup.parse(html).text();
+    }
+
+    @Override
+    public void onComplete(String result) {
+        sendFindPathRequest(result);
+    }
+
+    @Override
+    public void processFinish(ArrayList<Route> listRoadInfo) {
+        GPSTracker gps = new GPSTracker(this);
+        LatLng myLoc = new LatLng(gps.getLatitude(), gps.getLongitude());
+        for (Route route : listRoadInfo) {
+            double dist = computeDistanceBetween(myLoc, route.points.get(0));
+            if (dist <= 1000) {
+                PolylineOptions polylineOps = new PolylineOptions()
+                        .geodesic(true)
+                        .color(Color.RED)
+                        .width(15)
+                        .add(route.points.get(0))
+                        .add(route.points.get(1));
+                mMap.addPolyline(polylineOps);
+            }
+        }
+    }
+
+    @Override
+    public void processFinish(String result) {
+
     }
 
     public class MarkerAnimation {
@@ -316,11 +398,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         public void animateLine(ArrayList<LatLng> Trips, GoogleMap map, Marker marker, Context current) {
             _trips.addAll(Trips);
             _marker = marker;
-
-            animateMarker();
+            int dist=1;
+            if (Trips.size()>1) {
+                dist = (int) computeDistanceBetween(Trips.get(0), Trips.get(1));
+            }
+            animateMarker((dist/22)*1000);
         }
 
-        public void animateMarker() {
+        public void animateMarker(int speed) {
             TypeEvaluator<LatLng> typeEvaluator = new TypeEvaluator<LatLng>() {
                 @Override
                 public LatLng evaluate(float fraction, LatLng startValue, LatLng endValue) {
@@ -353,12 +438,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //  animDrawable.stop();
                     if (_trips.size() > 1) {
                         _trips.remove(0);
-                        animateMarker();
+                        int dist=3000;
+                        if (_trips.size()>1) {
+                            dist = (int) ((int) 1000*computeDistanceBetween(_trips.get(0), _trips.get(1)));
+                        }
+                        animateMarker((dist / 22));
                     }
                 }
             });
 
-            animator.setDuration(300);
+            animator.setDuration(speed);
             animator.start();
         }
     }
